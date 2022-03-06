@@ -4,7 +4,7 @@
 With this script, you are able to copy automatically all necessary files for a first compilation.
 <br />
 
-**Made for Epitech Students - According to the 2021/2022 Epitech Coding Style**
+**Made for Epitech Students - According to the 2021 / 2022 Epitech Coding Style**
 
 This script has been made by Mathieu Nowakowski.
 
