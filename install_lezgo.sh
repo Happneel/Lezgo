@@ -11,15 +11,15 @@ read reply
 if [ -z ${reply} ]
 then
     sudo chmod +x lezgo
-    sudo cp -Rf ../lezgo/ /usr/local/lib/
+    sudo cp -Rf ../Lezgo/ /usr/local/lib/
     sudo cp lezgo /usr/local/bin
 elif [[ -f ${reply} ]]
 then
     sudo chmod +x lezgo
-    sudo cp -Rf ../lezgo/ /usr/local/lib/
+    sudo cp -Rf ../Lezgo/ /usr/local/lib/
     sudo cp lezgo /usr/local/bin
-    sudo cp ${reply} /usr/local/lib/lezgo/init/lib/my/
-    sudo mv /usr/local/lib/lezgo/init/lib/my/${reply} /usr/local/lib/lezgo/init/lib/my/my.h
+    sudo cp ${reply} /usr/local/lib/Lezgo/init/lib/my/
+    sudo mv /usr/local/lib/Lezgo/init/lib/my/${reply} /usr/local/lib/Lezgo/init/lib/my/my.h
 else
     echo
     echo -e ${BOLDRED}lezgo: no such file or directory: ${YELLOW}${reply}${RMC}

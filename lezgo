@@ -56,7 +56,7 @@ then
     echo
     echo -e ${YELLOW}let\'s undo your error x\)${RMC}
     echo
-    find /usr/local/lib/lezgo/init/ | sed 's|.*init/||' | while read i;
+    find /usr/local/lib/Lezgo/init/ | sed 's|.*init/||' | while read i;
     do
         if [ -z $i ];
         then
@@ -78,7 +78,7 @@ then
         exit 0
     fi
     mkdir -p $3
-    cp -rfi /usr/local/lib/lezgo/init/* $3
+    cp -rfi /usr/local/lib/Lezgo/init/* $3
     cd $3
     awk -v prj="$2" '{sub("## bin name ##",prj)}1' Makefile > temp.txt && mv temp.txt Makefile
     awk -v prj="$2" '{sub("## files to compile in src/ excluding main.c ##","\t\t"prj)}1' Makefile > temp.txt && mv temp.txt Makefile
@@ -125,7 +125,7 @@ then
     exit 0
 else
     mkdir -p $1
-    cp -rfi /usr/local/lib/lezgo/init/* $1
+    cp -rfi /usr/local/lib/Lezgo/init/* $1
     echo
     echo -e ${WHITEBLINK}Done =\)${RMC}
     echo
