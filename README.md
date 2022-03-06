@@ -1,6 +1,7 @@
 # Lezgo
 
 **Lezgo** (`lezgo.sh`) is a [bash](https://en.wikipedia.org/wiki/Bash_%28Unix_shell%29) script made for people who wants to optimize everything =)
+<br />
 With this script, you are able to copy automatically all necessary files for a first compilation.
 <br />
 
@@ -30,6 +31,16 @@ Download this repository to your local machine.
 > I got your back ! Undo all `cp` commands this script made.
   - **Note** : Not fully working with `-a` and `--auto` flags.
   - **Note 2** : Be careful with this command ! This can conflict with same-name files and can delete your old files.
+
+## Uninstall
+Why would you do that ?
+<br />
+But if you want to.. here it is :(
+
+    $ sudo rm -r /usr/local/lib/lezgo/
+    $ sudo rm -r /usr/local/bin/lezgo
+    
+    Done !
 <br />
 
 
