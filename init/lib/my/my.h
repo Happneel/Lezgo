@@ -41,7 +41,27 @@ char *my_strupcase(char *);
 void my_swap(int *, int *);
 int my_show_word_array(char * const *);
 char *my_strdup(char const *);
-char **my_str_to_word_array(char const *);
+char **my_str_to_word_array(char const *, char);
 int my_atoi(char const *);
+void my_printf(char *s, ...);
+void my_putchar(char c);
+int my_putstr(char const *str);
+int my_put_nbr(int nb);
+int my_put_bin(int nb);
+int my_intlen(int nb);
+int my_atoi(char const *str);
+char *my_revstr (char *str);
+int my_strlen(char const *str);
+unsigned int my_put_unbr(unsigned int nb);
+void my_put_hex_min(unsigned int nb);
+char *my_itoa(int nb);
+void my_put_hex_maj(unsigned int nb);
+void print_int_array(int **map);
+int my_putstr_s_maj(char const *str);
+void free_2d_char_array(char **map);
+void free_2d_int_array(int **map);
+int **map_to_int_array(char **map);
+char **recover_map_in_array(char *filepath, char delimiter);
+void my_print_array(char **map);
 
-#endif /*MY_H_*/
+#endif/*MY_H_*/

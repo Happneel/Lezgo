@@ -1,24 +1,17 @@
 /*
 ** EPITECH PROJECT, 2021
-** test_bsq
+** test_.c
 ** File description:
-** test_bsq
+** test_
 */
 
 #include <criterion/criterion.h>
-#include <criterion/redirect.h>
-#include "main.h"
+#include "/*out*/.h"
 
-void redirect_all_stdout(void)
+Test(/*out*/_test, simple_test)
 {
-        cr_redirect_stdout();
-        cr_redirect_stderr();
-}
+    int ac = 1;
+    char *av[1] = {"./out"};
 
-Test(/*out*/_test, file_descriptor_failure, .init = redirect_all_stdout)
-{
-    char *str = "get rickrolled";
-
-    /*function*/
-    cr_assert_stdout_eq_str("");
+    cr_assert_eq(/*out*/(ac, av), 0);
 }

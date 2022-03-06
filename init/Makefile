@@ -6,17 +6,22 @@
 ##
 
 OUT = ## bin name ##
-SRCNAMES = ## files to compile in src/ ##
-
+SRCNAMES =	error_handling\
+## files to compile in src/ excluding main.c ##
 TESTSNAMES = ## files in tests/ ##
-TESTEDNAMES = ## files to test in src/ ##
+
+## DON'T TOUCH BELOW THIS LINE ##
+
+SRCMAIN =	$(SRCNAMES)\
+		main
+TESTEDNAMES =	$(SRCNAMES)
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -Werror -std=c99 -Og
+CFLAGS = -Wall -Wextra
 CPPFLAGS = -Iinclude/
 LDLIBS = -L lib/my -lmy
 
-SRC = $(addsuffix .c, $(addprefix src/, $(SRCNAMES)))
+SRC = $(addsuffix .c, $(addprefix src/, $(SRCMAIN)))
 OBJ = $(SRC:.c=.o)
 
 TESTOUT = test_$(OUT)
@@ -24,6 +29,12 @@ TESTLIBS = -lcriterion
 
 TESTS = $(addsuffix .c, $(addprefix tests/, $(TESTSNAMES)))
 TESTED = $(addsuffix .c, $(addprefix src/, $(TESTEDNAMES)))
+
+TESTFILES =     *.gcno\
+	        *.gcda
+TEMPFILES =     *~\
+                *\#
+VGFILES =       vgcore.*
 
 .PHONY: all compile clean fclean re tests libcreate libclean libfclean
 
@@ -33,7 +44,7 @@ compile: $(OBJ)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJ) -o $(OUT) $(LDLIBS)
 
 tests_run: clean libcreate
-	$(CC) --coverage -o $(TESTOUT) $(TESTED) $(TESTS) \
+	$(CC) --coverage -o $(TESTOUT) $(TESTED) $(TESTS)\
 	    $(TESTLIBS) $(LDLIBS) $(CPPFLAGS)
 	./$(TESTOUT)
 	gcovr --exclude tests/
@@ -49,13 +60,10 @@ libfclean:
 	make -C ./lib/my fclean
 
 clean:	libclean
-	rm -f $(OBJ)
-	find -name "*.gcno" -delete
-	find -name "*.gcda" -delete
-	find -name "*~" -delete
-	find -name "*#" -delete
-	find -name "vgcore.*" -delete
-
+	$(RM) $(OBJ)
+	$(RM) $(TESTFILES)
+	$(RM) $(TEMPFILES) src/$(TEMPFILES) lib/my/$(TEMPFILES)
+	$(RM) $(VGFILES) src/$(VGFILES) lib/my/$(VGFILES)
 fclean: libfclean clean
 	$(RM) $(OUT)
 	$(RM) $(TESTOUT)

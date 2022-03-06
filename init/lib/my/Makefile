@@ -5,28 +5,34 @@
 ## csfml is the best thing ever
 ##
 
-SRC = ## files you want to add into your lib ##
+SRCNAMES = ## files you want to add into your lib ##
 
+## DON'T TOUCH BELOW THIS LINE ##
+
+SRC = $(addsuffix .c, $(SRCNAMES))
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -Werror -std=c99 -Og
+CFLAGS = -Wall -Wextra
 
 OUTPUTFILE	= libmy.a
 
 OBJ =	$(SRC:c=o)
 
+TESTFILES =     *.gnco\
+	        *.gcda
+TEMPFILES =     *~\
+                *\#
+VGFILES =       vgcore.*
+
 all: $(OBJ)
 	ar rc $(OUTPUTFILE) $(OBJ)
 	mkdir -p ../../include
 	cp my.h ../../include/
-	cp libmy.a ../
 
 clean:
-        find -name "*.gcno" -delete
-        find -name "*.gcda" -delete
-        find -name "*~" -delete
-        find -name "*#" -delete
-        find -name "vgcore.*" -delete
 	$(RM) $(OBJ)
+	$(RM) $(TESTFILES)
+	$(RM) $(TEMPFILES)
+	$(RM) $(VGFILES)
 
 fclean:	clean
 	$(RM) $(OUTPUTFILE)
