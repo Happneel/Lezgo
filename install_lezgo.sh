@@ -12,13 +12,13 @@ if [ -z ${reply} ]
 then
     sudo chmod +x lezgo
     sudo mkdir /usr/local/lib/Lezgo/
-    sudo cp -Rf ./* /usr/local/lib/
+    sudo cp -Rf ./* /usr/local/lib/Lezgo/
     sudo cp lezgo /usr/local/bin/
 elif [[ -f ${reply} ]]
 then
     sudo chmod +x lezgo
     sudo mkdir /usr/local/lib/Lezgo/
-    sudo cp -Rf ./* /usr/local/lib/
+    sudo cp -Rf ./* /usr/local/lib/Lezgo/
     sudo cp lezgo /usr/local/bin/
     sudo cp ${reply} /usr/local/lib/Lezgo/init/lib/my/
     sudo mv /usr/local/lib/Lezgo/init/lib/my/${reply} /usr/local/lib/Lezgo/init/lib/my/my.h
