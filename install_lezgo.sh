@@ -11,13 +11,15 @@ read reply
 if [ -z ${reply} ]
 then
     sudo chmod +x lezgo
-    sudo cp -Rf ../Lezgo/ /usr/local/lib/
-    sudo cp lezgo /usr/local/bin
+    sudo mkdir /usr/local/lib/Lezgo/
+    sudo cp -Rf ./* /usr/local/lib/
+    sudo cp lezgo /usr/local/bin/
 elif [[ -f ${reply} ]]
 then
     sudo chmod +x lezgo
-    sudo cp -Rf ../Lezgo/ /usr/local/lib/
-    sudo cp lezgo /usr/local/bin
+    sudo mkdir /usr/local/lib/Lezgo/
+    sudo cp -Rf ./* /usr/local/lib/
+    sudo cp lezgo /usr/local/bin/
     sudo cp ${reply} /usr/local/lib/Lezgo/init/lib/my/
     sudo mv /usr/local/lib/Lezgo/init/lib/my/${reply} /usr/local/lib/Lezgo/init/lib/my/my.h
 else
