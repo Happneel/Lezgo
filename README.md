@@ -2,6 +2,7 @@
 
 **Lezgo** (`lezgo.sh`) is a [bash](https://en.wikipedia.org/wiki/Bash_%28Unix_shell%29) script made for people who wants to optimize everything =)
 With this script, you are able to copy automatically all necessary files for a first compilation.
+**Made for Epitech Students - According to the 2022 Epitech Coding Style**
 
 This script has been made by Mathieu Nowakowski.
 
