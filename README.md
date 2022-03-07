@@ -40,7 +40,7 @@ Why would you do that ?
 But if you want to.. here it is :(
 
     $ sudo rm -r /usr/local/lib/Lezgo/
-    $ sudo rm -r /usr/local/bin/lezgo
+    $ sudo rm /usr/local/bin/lezgo
     
     Done !
 <br />
