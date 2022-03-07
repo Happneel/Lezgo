@@ -6,138 +6,153 @@ BOLDRED='\033[1;31m'
 WHITEBLINK='\033[97;5m'
 RMC='\033[0m'
 
-if [ -z $1 ];
-then
-    echo
-    echo -e Type \"${YELLOW}lezgo -h \(or --help\)${RMC}\" for help.
-    echo
+set -eu
+set -o pipefail
+shopt -s nocasematch
+
+INSTALL=$(dirname "${BASH_SOURCE[0]}")
+
+case "$INSTALL" in
+*"usr/"*)
+    SHARE_PATH="/usr/local/share/Lezgo/"
+    ;;
+*)
+    SHARE_PATH="$HOME/.local/share/Lezgo"
+    ;;
+esac
+
+function help_short() {
+    printf "$0: invalid option -- '${1//-/}' \nTry '$0 --help' for more information.\n"
+    exit 1
+}
+
+case "$1" in
+"-v" | "--version")
+    printf "lezgo version 0.0.2\n MIT License \n\nCopyright (c) 2021 Happneel"
     exit 0
-fi
-if [ $1 == "-h" ] || [ $1 == "--help" ];
-then
-    echo -e ${BOLDRED}-------------------------------------------------------------------
-    echo This mini script has been made for people who wants to optimize
-    echo everything =\)
-    echo With this script, you are able to copy automatically all
-    echo necessary files for a first compilation.
-    echo
-    echo This script has been made by Mathieu Nowakowski.
-    echo -e -------------------------------------------------------------------${RMC}
-    echo
-    echo -e ${GREEN}Enter the directory where you want to copy the base.
-    echo -e \(even if the directory doesn\'t exist.\)${RMC}
-    echo
-    echo -e Usage : ${YELLOW}$ lezgo \"directory_name/\"${RMC}
-    echo
-    echo -e ${GREEN}Type -a or --auto to automatically generate your base
-    echo -e with the project name${RMC}
-    echo
-    echo -e Usage : ${YELLOW}$ lezgo -a \(or --auto\) \"project_name\" \"directory_name/\"${RMC}
-    echo
-    echo -e ${GREEN}You can also type -u \(or --undo\) if you made a mistake${RMC}
-    echo
-    echo -e Usage : ${YELLOW}$ lezgo -u \(or --undo\) \"directory_name/\"${RMC}
-    echo
-    echo -e ${GREEN}Type -h or --help to display this help page${RMC}
-    echo
-    echo -e Usage : ${YELLOW}$ lezgo -h \(or --help\)${RMC}
-    echo
+    ;;
+"-h" | "--help")
+    message=$(
+        cat <<-EOF
+Usage: $0 [OPTION]... [PROJECT NAME] DIRECTORY
+Creates a boilerplate project for C/C++ development in DIRECTORY
+
+-a, --auto      generate the whole boilerplate (including code additions) in DIRECTORY with PROJECT NAME
+
+-c, --copy-only generate the boilerplate without code additions DIRECTORY with PROJECT NAME, this is the default
+
+-u, --undo      revert changes done
+
+-h, --help      display this help page
+
+Help: To get help and/or report bugs, see <https://github.com/Happneel/Lezgo>
+EOF
+    )
+    printf "$message"
     exit 0
-fi
-if [ $1 == "-u" ] || [ $1 == "--undo" ]
-then
-    if [ -z $2 ]
-    then
-        echo
-        echo -e Usage : ${YELLOW}$ lezgo -u \(or --undo\) \"directory_name/\"${RMC}
-        echo
+    ;;
+"-u" | "--undo")
+    if [[ -z $2 ]]; then
+        message=$(
+            cat <<EOF
+
+Usage : ${YELLOW}$ lezgo -u (or --undo) "directory_name/"${RMC}\n\n
+
+EOF
+        )
+        printf "$message"
         exit 0
     fi
-    echo
-    echo -e ${YELLOW}let\'s undo your error x\)${RMC}
-    echo
-    find /usr/local/lib/Lezgo/init/ | sed 's|.*init/||' | while read i;
-    do
-        if [ -z $i ];
-        then
+    printf "\n${YELLOW}Let's undo your error x)${RMC}\nPress ${BOLDRED}y${RMC} when you want to delete and any other key to skip\n"
+    find "$SHARE_PATH"/lib/Lezgo/init/ | sed 's|.*init/||' | while read -r i; do
+        case $i in
+        "y" | "yes")
+            rm -rf "${2:?}"/"${i:?}" || printf "${RED}rm failed${RMC}" && exit 1
+            printf "$i ${RED}deleted${RMC}"
+            ;;
+        *)
             continue
-        else
-            rm -rf $2/$i
-            echo -e $i ${RED}deleted${RMC}
-        fi
+            ;;
+        esac
     done
     exit 0
-fi
-if [ $1 == "-a" ] || [ $1 == "--auto" ]
-then
-    if [ -z $2 ] || [ -z $3 ]
-    then
-        echo
-        echo -e Usage : ${YELLOW}$ lezgo -a \(or --auto\) \"project_name\" \"directory_name/\"${RMC}
-        echo
-        exit 0
+    ;;
+
+"-a" | "--auto")
+    if [ -z "$2" ] || [ -z "$3" ]; then
+        printf "\nUsage : ${YELLOW}$ $0 --auto \"PROJECT NAME\" \"DIRECTORY/\"${RMC}\n"
+        exit 1
     fi
-    mkdir -p $3
-    cp -rfi /usr/local/lib/Lezgo/init/* $3
-    cd $3
-    awk -v prj="$2" '{sub("## bin name ##",prj)}1' Makefile > temp.txt && mv temp.txt Makefile
-    awk -v prj="$2" '{sub("## files to compile in src/ excluding main.c ##","\t\t"prj)}1' Makefile > temp.txt && mv temp.txt Makefile
-    awk -v prj="$2" '{sub("## files in tests/ ##","test_"prj)}1' Makefile > temp.txt && mv temp.txt Makefile
-    cd include/
-    mv out.h $2.h
-    awk -v prj="$2" '{sub("out", prj)}1' $2.h > temp.txt && mv temp.txt $2.h
-    awk -v prj="${2^^}" '{sub("_H_",prj"_H_")}1' $2.h > temp.txt && mv temp.txt $2.h
-    sed 12d $2.h > temp.txt && mv temp.txt $2.h
-    sed -i "12i\int $2(int ac, char **av);" $2.h
-    cd ../src/
-    mv function.c $2.c
-    sed 8d main.c > temp.txt && mv temp.txt main.c
+    TEMP=$(mktemp -dq) || TEMP=$PWD # Guarentee appropriate garbage collection
+    mkdir -p "$3"
+    cp -rfi "$SHARE_PATH"/lib/Lezgo/init/* "$3"
+    cd "$3" || printf "${RED}cd failed${RMC}" && exit 1
+    awk -v prj="$2" '{sub("## bin name ##",prj)}1' Makefile >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt Makefile
+    awk -v prj="$2" '{sub("## files to compile in src/ excluding main.c ##","\t\t"prj)}1' Makefile >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt Makefile
+    awk -v prj="$2" '{sub("## files in tests/ ##","test_"prj)}1' Makefile >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt Makefile
+    cd include/ || printf "${RED}cd failed${RMC}" && exit 1
+    mv out.h "$2".h
+    awk -v prj="$2" '{sub("out", prj)}1' "$2".h >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt "$2".h
+    awk -v prj="${2^^}" '{sub("_H_",prj"_H_")}1' "$2".h >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt "$2".h
+    sed 12d "$2".h >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt "$2".h
+    sed -i "12i\int $2(int ac, char **av);" "$2".h
+    cd ../src/ || printf "${RED}cd failed${RMC}" && exit 1
+    mv function.c "$2".c
+    sed 8d main.c >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt main.c
     sed -i "8i\#include \"$2.h\"" main.c
-    sed 12d main.c > temp.txt && mv temp.txt main.c
+    sed 12d main.c >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt main.c
     sed -i "12i\    return $2(ac, av);" main.c
-    awk -v prj="$2" '{sub("function",prj)}1' $2.c > temp.txt && mv temp.txt $2.c
-    cd ../tests/
-    mv test_.c test_$2.c
-    awk -v prj="$2" '{sub("test_","test_"prj)}1' test_$2.c > temp.txt && mv temp.txt test_$2.c
-    sed 9d test_$2.c > temp.txt && mv temp.txt test_$2.c
-    sed -i "9i\#include \"$2.h\"" test_$2.c
-    sed 11d test_$2.c > temp.txt && mv temp.txt test_$2.c
-    sed -i "11i\Test($2_test, simple_test)" test_$2.c
-    sed 16d test_$2.c > temp.txt && mv temp.txt test_$2.c
-    sed -i "16i\    cr_assert_eq($2(ac, av), 0);" test_$2.c
-    awk -v prj="$2" '{sub("out",prj)}1' test_$2.c > temp.txt && mv temp.txt test_$2.c
-    echo
-    echo -e ${WHITEBLINK}Done =\)${RMC}
-    echo
-    echo -e Your project $2 has been automatically generated.
-    echo
-    echo -e ${BOLDRED}This script has been made by Mathieu Nowakowski. \(2022\)${RMC}
-    echo
+    awk -v prj="$2" '{sub("function",prj)}1' "$2".c >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt "$2".c
+    cd ../tests/ || printf "${RED}cd failed${RMC}" && exit 1
+    mv test_.c test_"$2".c
+    awk -v prj="$2" '{sub("test_","test_"prj)}1' test_"$2".c >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt test_"$2".c
+    sed 9d test_"$2".c >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt test_"$2".c
+    sed -i "9i\#include \"$2.h\"" test_"$2".c
+    sed 11d test_"$2".c >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt test_"$2".c
+    sed -i "11i\Test($2_test, simple_test)" test_"$2".c
+    sed 16d test_"$2".c >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt test_"$2".c
+    sed -i "16i\    cr_assert_eq($2(ac, av), 0);" test_"$2".c
+    awk -v prj="$2" '{sub("out",prj)}1' test_"$2".c >"$TEMP"/temp.txt && mv "$TEMP"/temp.txt test_"$2".c
+    message=$(
+        cat <<-EOF
+${WHITEBLINK}Done =)${RMC}
+
+Your project $2 has been automatically generated.
+
+${BOLDRED}This script has been made by Mathieu Nowakowski. (2022)${RMC}\n
+
+EOF
+    )
+    printf "$message"
     exit 0
-fi
-if [[ $1 == -* ]]
-then
-    echo
-    echo lezgo: invalid option --a "$1"
-    echo
-    echo -e Type \"${YELLOW}lezgo -h \(or --help\)${RMC}\" for help.
-    echo
+    ;;
+"-*")
+    help_short "$@"
+    ;;
+"/" | "~" | "-c" | "--copy-only")
+    mkdir -p "$1"
+    cp -rfi "$SHARE_PATH"/lib/Lezgo/init/* "$1"
+    message=$(
+        cat <<-EOF
+
+${WHITEBLINK}Done =)${RMC}
+
+${YELLOW}In order to compile, you have to :${RMC}
+- Fill in the first third variables in ${GREEN}$1/Makefile${RMC}
+- Add your functions in ${GREEN}$1/src${RMC}
+- Add your own lib in ${GREEN}$1/lib/my/${RMC} (to avoid a -42) ;)
+- Fill in the first variable in ${GREEN}$1/lib/my/Makefile${RMC}
+- Fill in the ${GREEN}$1/include/main.h${RMC} with your protoypes ;)
+- Fill in and rename ${GREEN}$1/tests/test_.c${RMC} (Optional)
+
+${BOLDRED}This script has been made by Mathieu Nowakowski. (2022)${RMC}\n
+EOF
+    )
+    printf "$message"
     exit 0
-else
-    mkdir -p $1
-    cp -rfi /usr/local/lib/Lezgo/init/* $1
-    echo
-    echo -e ${WHITEBLINK}Done =\)${RMC}
-    echo
-    echo -e ${YELLOW}In order to compile, you have to :${RMC}
-    echo -e \- Fill in the first third variables in ${GREEN}$1/Makefile${RMC}
-    echo -e \- Add your functions in ${GREEN}$1/src${RMC}
-    echo -e \- Add your own lib in ${GREEN}$1/lib/my/${RMC} \(to avoid a -42\) \;\)
-    echo -e \- Fill in the first variable in ${GREEN}$1/lib/my/Makefile${RMC}
-    echo -e \- Fill in the ${GREEN}$1/include/main.h${RMC} with your protoypes \;\)
-    echo -e \- Fill in and rename ${GREEN}$1/tests/test_.c${RMC} \(Optional\)
-    echo
-    echo -e ${BOLDRED}This script has been made by Mathieu Nowakowski. \(2022\)${RMC}
-    echo
-    exit 0
-fi
+    ;;
+
+*)
+    help_short "$@"
+    ;;
+esac
